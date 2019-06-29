@@ -97,10 +97,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d("count list", "geoLocate: "+list.size());
 
             if(list.size() != 0){
+                String snippet = "Code : "+list.get(0).getCountryCode()+"\n"+
+                        "Website : "+list.get(0).getUrl()+"\n"+
+                        "Country : "+list.get(0).getCountryName()+"\n"+
                 Log.i("Location", list.get(0).getCountryName());
-                googleMap.addMarker(new MarkerOptions().position(new LatLng(list.get(0).getLatitude(),list.get(0).getLongitude())).title(list.get(0).getAddressLine(0)));
+                googleMap.addMarker(new MarkerOptions().position(new LatLng(list.get(0).getLatitude(),list.get(0).getLongitude())).title(list.get(0).getAddressLine(0)).snippet(snippet));
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(list.get(0).getLatitude(),list.get(0).getLongitude()),16f));
-
+                googleMap.setInfoWindowAdapter(new MapInformationAdapter(MapsActivity.this));
 
             }
         } catch (IOException e) {
