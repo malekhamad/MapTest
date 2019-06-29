@@ -36,8 +36,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,11 +61,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_REQUEST_CODE = 123;
+    int PLACE_PICKER_REQUEST = 1;
     private boolean isPermissionsGranted = false;
     private GoogleMap googleMap;
     FusedLocationProviderClient fusedLocationProviderClient;
     LocationManager lm ;
     private EditText editSearch ;
+    ImageView imagePlace;
 
 
 
@@ -70,11 +76,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
     editSearch = findViewById(R.id.search_address);
-
+    imagePlace = findViewById(R.id.image_place);
              lm =  (LocationManager)this.getSystemService(Context.LOCATION_SERVICE);
         getLocationPermission();
 
-
+    // for search box . . . ;
    editSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
        @Override
        public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
@@ -82,6 +88,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                geoLocate(textView.getText().toString());
            }
            return false;
+       }
+   });
+
+   // for place image . . . ;;
+   imagePlace.setOnClickListener(new View.OnClickListener() {
+       @Override
+       public void onClick(View view) {
+
+           try {
+               PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+               startActivityForResult(builder.build(MapsActivity.this), PLACE_PICKER_REQUEST);
+
+           } catch (GooglePlayServicesRepairableException e) {
+               e.printStackTrace();
+           } catch (GooglePlayServicesNotAvailableException e) {
+               e.printStackTrace();
+           }
        }
    });
 
@@ -232,5 +255,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return false;
 
+    }
+
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == PLACE_PICKER_REQUEST) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlacePicker.getPlace(this,data);
+                String toastMsg = String.format("Place: %s", place.getName());
+                Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
